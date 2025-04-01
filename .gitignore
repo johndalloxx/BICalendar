@@ -1,2 +1,4 @@
 bin/Debug/net9.0
 obj
+API/bin/Debug/net9.0
+APP/node_modules

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
 builder.Services.AddOutputCache();
@@ -17,6 +20,13 @@ builder.Services.AddSwaggerGen(options =>
 	});
 });
 
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy(name: MyAllowSpecificOrigins,
+					  policy => policy.WithOrigins("http://localhost:5173")
+									  .AllowAnyHeader()
+									  .AllowAnyMethod());
+});
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -28,8 +38,9 @@ if (app.Environment.IsDevelopment())
 	});
 }
 
+
 app.UseExceptionHandler("/error");
-app.MapGet("/",
+app.MapGet("/events",
 		async Task<Results<
 		Ok<IEnumerable<BICalendarResponse>>,
 		BadRequest<string>,
@@ -80,4 +91,5 @@ app.MapGet("/",
 			}
 		}).CacheOutput(builder => builder.Expire(TimeSpan.FromMinutes(5)));
 
+app.UseCors(MyAllowSpecificOrigins);
 app.Run();
